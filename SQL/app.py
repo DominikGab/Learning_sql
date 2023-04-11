@@ -1,4 +1,5 @@
 from sqlalchemy import create_engine, Table, Column, Integer, String, MetaData, Date, Float
+import csv
 
 engine = create_engine('sqlite:///C:\\Kodilla\\Kurs\\SQL\\air.db')
 
@@ -17,8 +18,8 @@ clean_stations = Table(
 
 clean_measure = Table(
    'clean_measure', meta,
-   Column('id', Integer, primary_key=True, autoincrement=True),
-   Column('date', Date),
+   Column('station', String),
+   Column('date', String),
    Column('precip', Float),
    Column('tobs', Integer),
 )
@@ -37,3 +38,29 @@ results = engine.execute("SELECT * FROM clean_stations")
 
 for r in results:
    print(r)
+
+
+with open('clean_stations.csv', 'r') as csvfile:
+    reader = csv.DictReader(csvfile)
+    for row in reader:
+        ins = clean_stations.insert().values(
+            station=row['station'],
+            latitude=float(row['latitude']),
+            longitude=float(row['longitude']),
+            elevation=float(row['elevation']),
+            name=row['name'],
+            country=row['country'],
+            state=row['state']
+        )
+        engine.execute(ins)
+
+with open('clean_measure.csv', 'r') as csvfile:
+    reader = csv.DictReader(csvfile)
+    for row in reader:
+        ins = clean_measure.insert().values(
+            station=row['station'],
+            date=row['date'],
+            precip=float(row['precip']),
+            tobs=int(row['tobs'])
+        )
+        engine.execute(ins)
